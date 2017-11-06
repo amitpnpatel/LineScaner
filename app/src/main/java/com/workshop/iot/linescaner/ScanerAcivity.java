@@ -160,7 +160,7 @@ public class ScanerAcivity extends AppCompatActivity implements CameraController
     }
 
     public class CheckPreviewTask extends AsyncTask<Void, Integer, Void> {
-
+        long scanDelay=100;
         @Override
         protected void onPostExecute(Void result) {
             new DrawOverlayOutline().execute();
@@ -180,7 +180,7 @@ public class ScanerAcivity extends AppCompatActivity implements CameraController
         @Override
         protected Void doInBackground(Void... params) {
             try {
-                Thread.sleep(1000);
+                Thread.sleep(scanDelay);
                 updateProgress(5);
                 checkBaseBitmap(this);
             } catch (IOException e) {
@@ -236,10 +236,10 @@ public class ScanerAcivity extends AppCompatActivity implements CameraController
             int widthPreviewgap = (canvas.getWidth() - cameraPreviewDisplayWidth) / 2;
             int heightPreviewgap = (canvas.getHeight() - cameraPreviewDisplayHeight) / 2;
             canvas.drawRect(widthPreviewgap, heightPreviewgap, canvas.getWidth() - widthPreviewgap, canvas.getHeight() - heightPreviewgap, myPaint);
-            canvas.drawText("" + square.center, canvas.getWidth() / 2, canvas.getHeight() / 2, myPaint);
+            canvas.drawText("C:" + square.center+" L:"+square.length, canvas.getWidth() / 2, canvas.getHeight() / 2, myPaint);
             int squareOutLineLength = (cameraPreviewDisplayWidth * square.length) / 100;
             int squareOutLineCenter = (cameraPreviewDisplayWidth * square.center) / 100;
-            // drawSquare(canvas, widthPreviewgap+squareOutLineCenter, heightPreviewgap+cameraPreviewDisplayHeight/4, squareOutLineLength/2);
+            drawSquare(canvas, widthPreviewgap+squareOutLineCenter, heightPreviewgap+cameraPreviewDisplayHeight/4, squareOutLineLength/2);
         }
 
         private void drawSquare(Canvas canvas, int pixelCordinatesx, int pixelCordinatey, int lengthinpixel) {

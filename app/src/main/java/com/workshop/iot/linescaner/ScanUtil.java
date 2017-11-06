@@ -49,7 +49,7 @@ public class ScanUtil {
                 }
                 int endIndex=index;
                 if(result.length<(endIndex-startIndex)*100/bitmap.getHeight()){
-                    result=new Square(endIndex-startIndex,((endIndex+startIndex)*50)/bitmap.getHeight());
+                    result=new Square((endIndex-startIndex)*100/bitmap.getHeight(),100-((endIndex+startIndex)*50)/bitmap.getHeight());
                 }
             }
         }
