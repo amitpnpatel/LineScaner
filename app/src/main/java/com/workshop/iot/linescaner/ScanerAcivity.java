@@ -1,6 +1,5 @@
 package com.workshop.iot.linescaner;
 
-import android.app.ActionBar;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.graphics.Bitmap;
@@ -9,13 +8,12 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.PixelFormat;
+import android.graphics.Point;
 import android.graphics.PorterDuff;
-import android.graphics.drawable.ColorDrawable;
 import android.hardware.Camera;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.SurfaceHolder;
@@ -42,7 +40,7 @@ public class ScanerAcivity extends AppCompatActivity implements CameraController
     private AutofitPreview mTextureView;
     private ProgressBar scanProgress;
     ThreadBlueToothClient blueToothClient;
-    Square square = new Square(0, 0);
+    Box box=new Box();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -136,7 +134,7 @@ public class ScanerAcivity extends AppCompatActivity implements CameraController
         }
         baseBitmap = BitmapFactory.decodeByteArray(frameData, 0, frameData.length);
         checkPreviewTask.updateProgress(20);
-        square = ScanUtil.getLineCordinate(baseBitmap);
+        box = ScanUtil.getLineCordinate(baseBitmap);
     }
 
     @Override
@@ -236,10 +234,27 @@ public class ScanerAcivity extends AppCompatActivity implements CameraController
             int widthPreviewgap = (canvas.getWidth() - cameraPreviewDisplayWidth) / 2;
             int heightPreviewgap = (canvas.getHeight() - cameraPreviewDisplayHeight) / 2;
             canvas.drawRect(widthPreviewgap, heightPreviewgap, canvas.getWidth() - widthPreviewgap, canvas.getHeight() - heightPreviewgap, myPaint);
-            canvas.drawText("C:" + square.center+" L:"+square.length, canvas.getWidth() / 2, canvas.getHeight() / 2, myPaint);
-            int squareOutLineLength = (cameraPreviewDisplayWidth * square.length) / 100;
-            int squareOutLineCenter = (cameraPreviewDisplayWidth * square.center) / 100;
-            drawSquare(canvas, widthPreviewgap+squareOutLineCenter, heightPreviewgap+cameraPreviewDisplayHeight/4, squareOutLineLength/2);
+            canvas.drawText("C:" + box.centre+" I:"+box.inclination, canvas.getWidth() / 2, canvas.getHeight() / 2, myPaint);
+            int squareOutLineLength1 = (cameraPreviewDisplayWidth * box.l1.length) / 100;
+            int squareOutLineCenter1 = (cameraPreviewDisplayWidth * box.l1.centre) / 100;
+            int squareOutLineLength2 = (cameraPreviewDisplayWidth * box.l2.length) / 100;
+            int squareOutLineCenter2 = (cameraPreviewDisplayWidth * box.l2.centre) / 100;
+            int squareOutLineCenter = (cameraPreviewDisplayWidth * box.centre) / 100;
+            canvas.drawLine(widthPreviewgap,heightPreviewgap+(canvasHeight-heightPreviewgap*2)/8,canvasWidth-widthPreviewgap,heightPreviewgap+(canvasHeight-heightPreviewgap*2)/8,myPaint);
+            canvas.drawLine(widthPreviewgap,heightPreviewgap+(canvasHeight-heightPreviewgap*2)/2,canvasWidth-widthPreviewgap,heightPreviewgap+(canvasHeight-heightPreviewgap*2)/2,myPaint);
+            Paint boxPaint = new Paint();
+            boxPaint.setColor(Color.argb(255, 0, 0, 255));
+            boxPaint.setStrokeWidth(5);
+            boxPaint.setStyle(Paint.Style.STROKE);
+            Point p1=new Point(widthPreviewgap+squareOutLineCenter1-squareOutLineLength1/2,heightPreviewgap+(canvasHeight-heightPreviewgap*2)/8);
+            Point p2=new Point(widthPreviewgap+squareOutLineCenter1+squareOutLineLength1/2,heightPreviewgap+(canvasHeight-heightPreviewgap*2)/8);
+            Point p3=new Point(widthPreviewgap+squareOutLineCenter2+squareOutLineLength2/2,heightPreviewgap+(canvasHeight-heightPreviewgap*2)/2);
+            Point p4=new Point(widthPreviewgap+squareOutLineCenter2-squareOutLineLength2/2,heightPreviewgap+(canvasHeight-heightPreviewgap*2)/2);
+            canvas.drawLine(p1.x,p1.y,p2.x,p2.y,boxPaint);
+            canvas.drawLine(p2.x,p2.y,p3.x,p3.y,boxPaint);
+            canvas.drawLine(p3.x,p3.y,p4.x,p4.y,boxPaint);
+            canvas.drawLine(p4.x,p4.y,p1.x,p1.y,boxPaint);
+
         }
 
         private void drawSquare(Canvas canvas, int pixelCordinatesx, int pixelCordinatey, int lengthinpixel) {

@@ -2,7 +2,6 @@ package com.workshop.iot.linescaner;
 
 import android.graphics.Bitmap;
 import android.graphics.Color;
-import android.provider.Settings;
 
 /**
  * Created by amitp on 11/2/17.
@@ -11,11 +10,11 @@ import android.provider.Settings;
 public class ScanUtil {
     private static final double DARKNESS_THRESOLD=0.6;
 
-    public static Square getLineCordinate(Bitmap baseBitmap) {
+    public static Box getLineCordinate(Bitmap baseBitmap) {
         getdarknessArray(baseBitmap);
-        Square square=getMaxBrightSquare(baseBitmap);
-        System.out.println("c:"+square.center+" l:"+square.length);
-        return square;
+        Line lineTop = getMaxBrightLine(baseBitmap,baseBitmap.getWidth()/8);
+        Line lineBottom = getMaxBrightLine(baseBitmap,baseBitmap.getWidth()/2);
+        return new Box(lineTop,lineBottom,(baseBitmap.getWidth()*300)/(8*baseBitmap.getHeight()));
     }
 
     private static int[] getdarknessArray(Bitmap bitmap){
@@ -39,17 +38,17 @@ public class ScanUtil {
         }
         return result;
     }
-    private static Square getMaxBrightSquare(Bitmap bitmap){
-        Square result=new Square(0,0);
+    private static Line getMaxBrightLine(Bitmap bitmap, int verticlePosition){
+        Line result=new Line(0,0);
         for(int index=0;index<bitmap.getHeight();index++){
-            if(!isColorDark(bitmap.getPixel(bitmap.getWidth()/4,index))){
+            if(!isColorDark(bitmap.getPixel(verticlePosition,index))){
                 int startIndex=index;
-                while((!isColorDark(bitmap.getPixel(bitmap.getWidth()/4,index)))&& (index<bitmap.getHeight()-1)){
+                while((!isColorDark(bitmap.getPixel(verticlePosition,index)))&& (index<bitmap.getHeight()-1)){
                     index++;
                 }
                 int endIndex=index;
                 if(result.length<(endIndex-startIndex)*100/bitmap.getHeight()){
-                    result=new Square((endIndex-startIndex)*100/bitmap.getHeight(),100-((endIndex+startIndex)*50)/bitmap.getHeight());
+                    result=new Line((endIndex-startIndex)*100/bitmap.getHeight(),100-((endIndex+startIndex)*50)/bitmap.getHeight());
                 }
             }
         }
