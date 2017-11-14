@@ -13,6 +13,7 @@ import android.graphics.PorterDuff;
 import android.hardware.Camera;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -20,6 +21,7 @@ import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.View;
 import android.widget.ProgressBar;
+import android.widget.Toast;
 
 import com.workshop.iot.linescaner.cameraUtil.Camera1Controller;
 import com.workshop.iot.linescaner.cameraUtil.CameraController;
@@ -41,6 +43,7 @@ public class ScanerAcivity extends AppCompatActivity implements CameraController
     private ProgressBar scanProgress;
     ThreadBlueToothClient blueToothClient;
     Box box=new Box();
+    Handler handler=new Handler();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -95,6 +98,7 @@ public class ScanerAcivity extends AppCompatActivity implements CameraController
             BluetoothDevice bluetoothDevice = getBlueToothDevice();
             if (getBlueToothDevice() != null) {
                 blueToothClient = new ThreadBlueToothClient(bluetoothDevice, this);
+                blueToothClient.start();
             }
         }
         return super.onOptionsItemSelected(item);
@@ -125,7 +129,12 @@ public class ScanerAcivity extends AppCompatActivity implements CameraController
             cameraController.closeCamera();
         }
     }
-
+    private boolean sendPathCordinates(){
+        if(blueToothClient==null){
+            return false;
+        }
+       return blueToothClient.setLineCordinates((byte)box.centre,(byte)(box.inclination+50),(byte)1);
+    }
     private void checkBaseBitmap(CheckPreviewTask checkPreviewTask) throws IOException {
         byte[] frameData = cameraController.getFrame();
         checkPreviewTask.updateProgress(10);
@@ -144,24 +153,45 @@ public class ScanerAcivity extends AppCompatActivity implements CameraController
 
     @Override
     public boolean onConnect() {
+        handler.post(new Runnable() {
+            @Override
+            public void run() {
+                Toast.makeText(getApplicationContext(), "BLE connected",
+                        Toast.LENGTH_LONG).show();
+            }
+        });
         return false;
     }
 
     @Override
     public boolean onDisConnect() {
+        handler.post(new Runnable() {
+            @Override
+            public void run() {
+                Toast.makeText(getApplicationContext(), "BLE disconnected",
+                        Toast.LENGTH_LONG).show();
+            }
+        });
         return false;
     }
 
     @Override
     public void onError(Exception e) {
-
+        handler.post(new Runnable() {
+            @Override
+            public void run() {
+                Toast.makeText(getApplicationContext(), "BLE error",
+                        Toast.LENGTH_LONG).show();
+            }
+        });
     }
 
     public class CheckPreviewTask extends AsyncTask<Void, Integer, Void> {
-        long scanDelay=100;
+        long scanDelay=300;
         @Override
         protected void onPostExecute(Void result) {
             new DrawOverlayOutline().execute();
+            sendPathCordinates();
             processPreiewFrame();
         }
 

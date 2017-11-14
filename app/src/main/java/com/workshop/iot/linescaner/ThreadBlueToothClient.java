@@ -141,6 +141,7 @@ public class ThreadBlueToothClient extends Thread {
                 dataOutputStream.write(state);
                 dataOutputStream.write(centre);
                 dataOutputStream.write(inclination);
+                dataOutputStream.write('E');
                 dataOutputStream.write('\n');
                 dataOutputStream.flush();
             } catch (IOException e) {
