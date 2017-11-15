@@ -159,6 +159,7 @@ public class Camera1Controller implements CameraController {
             param.setPreviewSize(previewsize.width, previewsize.height);
             param.setPictureSize(picturesize.width, picturesize.height);
             param.setRotation(90);
+            param.setColorEffect(Camera.Parameters.EFFECT_WHITEBOARD);
             phoneRearCamera.setParameters(param);
             phoneRearCamera.setDisplayOrientation(90);
             try {

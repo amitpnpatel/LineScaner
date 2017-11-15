@@ -136,6 +136,10 @@ public class ScanerAcivity extends AppCompatActivity implements CameraController
        return blueToothClient.setLineCordinates((byte)box.centre,(byte)(box.inclination+50),(byte)1);
     }
     private void checkBaseBitmap(CheckPreviewTask checkPreviewTask) throws IOException {
+        if(baseBitmap!=null){
+            baseBitmap.recycle();
+            baseBitmap=null;
+        }
         byte[] frameData = cameraController.getFrame();
         checkPreviewTask.updateProgress(10);
         if (frameData == null) {
@@ -143,7 +147,10 @@ public class ScanerAcivity extends AppCompatActivity implements CameraController
         }
         baseBitmap = BitmapFactory.decodeByteArray(frameData, 0, frameData.length);
         checkPreviewTask.updateProgress(20);
-        box = ScanUtil.getLineCordinate(baseBitmap);
+        //box = ScanUtil.getWhiteLineCordinate(baseBitmap);
+        //box = ScanUtil.getRedLineCordinate(baseBitmap);
+        //box = ScanUtil.getYellowLineCordinate(baseBitmap);
+        box = ScanUtil.getBlueLineCordinate(baseBitmap);
     }
 
     @Override
