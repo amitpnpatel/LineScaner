@@ -134,13 +134,14 @@ public class ThreadBlueToothClient extends Thread {
         }
         return true;
     }
-    public boolean setLineCordinates(byte centre, byte inclination,byte state) {
+    public boolean setLineCordinates(byte centre, byte inclination,byte state,byte onMarker) {
         if (dataOutputStream != null) {
             try {
                 dataOutputStream.write(("SLC").getBytes());
                 dataOutputStream.write(state);
                 dataOutputStream.write(centre);
                 dataOutputStream.write(inclination);
+                dataOutputStream.write(onMarker);
                 dataOutputStream.write('E');
                 dataOutputStream.write('\n');
                 dataOutputStream.flush();

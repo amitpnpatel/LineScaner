@@ -3,6 +3,8 @@ package com.workshop.iot.linescaner;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 
+import static java.lang.StrictMath.abs;
+
 /**
  * Created by amitp on 11/2/17.
  */
@@ -13,22 +15,39 @@ public class ScanUtil {
     public static Box getWhiteLineCordinate(Bitmap baseBitmap) {
         Line lineTop = getMaxBrightLine(baseBitmap,baseBitmap.getWidth()/8);
         Line lineBottom = getMaxBrightLine(baseBitmap,baseBitmap.getWidth()/2);
-        return new Box(lineTop,lineBottom,(baseBitmap.getWidth()*300)/(8*baseBitmap.getHeight()));
+        boolean onMarker= isYellowMarker(baseBitmap,baseBitmap.getWidth()*5/16);
+        return new Box(lineTop,lineBottom,(baseBitmap.getWidth()*300)/(8*baseBitmap.getHeight()),onMarker);
     }
+
+    private static boolean isYellowMarker(Bitmap baseBitmap, int verticalPosition) {
+        Line[] lines=getYellowMarkerLines(baseBitmap,verticalPosition);
+        if(lines[0].length>5 && lines[1].length>5){
+            double sumLineLenght=(lines[0].length+lines[1].length)*1.0;
+            double centreDistance= abs(lines[0].centre-lines[1].centre)*1.0;
+            if(0.5< (centreDistance/sumLineLenght) && 2> (centreDistance/sumLineLenght)){
+                return true;
+            }
+        }
+        return false;
+    }
+
     public static Box getRedLineCordinate(Bitmap baseBitmap) {
         Line lineTop = getMaxRedLine(baseBitmap,baseBitmap.getWidth()/8);
         Line lineBottom = getMaxRedLine(baseBitmap,baseBitmap.getWidth()/2);
-        return new Box(lineTop,lineBottom,(baseBitmap.getWidth()*300)/(8*baseBitmap.getHeight()));
+        boolean onMarker= isYellowMarker(baseBitmap,baseBitmap.getWidth()*5/16);
+        return new Box(lineTop,lineBottom,(baseBitmap.getWidth()*300)/(8*baseBitmap.getHeight()),onMarker);
     }
     public static Box getBlueLineCordinate(Bitmap baseBitmap) {
         Line lineTop = getMaxBlueLine(baseBitmap,baseBitmap.getWidth()/8);
         Line lineBottom = getMaxBlueLine(baseBitmap,baseBitmap.getWidth()/2);
-        return new Box(lineTop,lineBottom,(baseBitmap.getWidth()*300)/(8*baseBitmap.getHeight()));
+        boolean onMarker= isYellowMarker(baseBitmap,baseBitmap.getWidth()*5/16);
+        return new Box(lineTop,lineBottom,(baseBitmap.getWidth()*300)/(8*baseBitmap.getHeight()),onMarker);
     }
     public static Box getYellowLineCordinate(Bitmap baseBitmap) {
         Line lineTop = getMaxYellowLine(baseBitmap,baseBitmap.getWidth()/8);
         Line lineBottom = getMaxYellowLine(baseBitmap,baseBitmap.getWidth()/2);
-        return new Box(lineTop,lineBottom,(baseBitmap.getWidth()*300)/(8*baseBitmap.getHeight()));
+        boolean onMarker= isYellowMarker(baseBitmap,baseBitmap.getWidth()*5/16);
+        return new Box(lineTop,lineBottom,(baseBitmap.getWidth()*300)/(8*baseBitmap.getHeight()),onMarker);
     }
     private static int[] getdarknessArray(Bitmap bitmap){
         int[] result= new int[11];
@@ -110,6 +129,29 @@ public class ScanUtil {
                 int endIndex=index;
                 if(result.length<(endIndex-startIndex)*100/bitmap.getHeight()){
                     result=new Line((endIndex-startIndex)*100/bitmap.getHeight(),100-((endIndex+startIndex)*50)/bitmap.getHeight());
+                }
+            }
+        }
+        return result;
+    }
+    private static Line[] getYellowMarkerLines(Bitmap bitmap, int verticlePosition){
+        Line result[]=new Line[2];
+        result[0]=new Line(0,0);
+        result[1]=new Line(0,0);
+        for(int index=0;index<bitmap.getHeight();index++){
+            if(isColorYellow(bitmap.getPixel(verticlePosition,index))){
+                int startIndex=index;
+                while((isColorYellow(bitmap.getPixel(verticlePosition,index)))&& (index<bitmap.getHeight()-1)){
+                    index++;
+                }
+                int endIndex=index;
+                if(result[1].length<(endIndex-startIndex)*100/bitmap.getHeight()){
+                    if(result[0].length<(endIndex-startIndex)*100/bitmap.getHeight()){
+                       result[1]=result[0];
+                       result[0]=new Line((endIndex-startIndex)*100/bitmap.getHeight(),100-((endIndex+startIndex)*50)/bitmap.getHeight());
+                    }else{
+                        result[1]=new Line((endIndex-startIndex)*100/bitmap.getHeight(),100-((endIndex+startIndex)*50)/bitmap.getHeight());
+                    }
                 }
             }
         }

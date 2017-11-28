@@ -133,7 +133,15 @@ public class ScanerAcivity extends AppCompatActivity implements CameraController
         if(blueToothClient==null){
             return false;
         }
-       return blueToothClient.setLineCordinates((byte)box.centre,(byte)(box.inclination+50),(byte)1);
+        byte pathState=0;
+        if(box.isPath){
+            pathState=1;
+        }
+        byte markerState=0;
+        if(box.onMarker){
+            markerState=1;
+        }
+       return blueToothClient.setLineCordinates((byte)box.centre,(byte)(box.inclination+50),pathState,markerState);
     }
     private void checkBaseBitmap(CheckPreviewTask checkPreviewTask) throws IOException {
         if(baseBitmap!=null){
@@ -148,9 +156,9 @@ public class ScanerAcivity extends AppCompatActivity implements CameraController
         baseBitmap = BitmapFactory.decodeByteArray(frameData, 0, frameData.length);
         checkPreviewTask.updateProgress(20);
         //box = ScanUtil.getWhiteLineCordinate(baseBitmap);
-        //box = ScanUtil.getRedLineCordinate(baseBitmap);
+        box = ScanUtil.getRedLineCordinate(baseBitmap);
         //box = ScanUtil.getYellowLineCordinate(baseBitmap);
-        box = ScanUtil.getBlueLineCordinate(baseBitmap);
+        //box = ScanUtil.getBlueLineCordinate(baseBitmap);
     }
 
     @Override
@@ -194,7 +202,7 @@ public class ScanerAcivity extends AppCompatActivity implements CameraController
     }
 
     public class CheckPreviewTask extends AsyncTask<Void, Integer, Void> {
-        long scanDelay=300;
+        long scanDelay=100;
         @Override
         protected void onPostExecute(Void result) {
             new DrawOverlayOutline().execute();
@@ -268,10 +276,11 @@ public class ScanerAcivity extends AppCompatActivity implements CameraController
             myPaint.setStrokeWidth(3);
             myPaint.setTextSize(100);
             myPaint.setStyle(Paint.Style.STROKE);
+            myPaint.setTextAlign(Paint.Align.CENTER);
             int widthPreviewgap = (canvas.getWidth() - cameraPreviewDisplayWidth) / 2;
             int heightPreviewgap = (canvas.getHeight() - cameraPreviewDisplayHeight) / 2;
             canvas.drawRect(widthPreviewgap, heightPreviewgap, canvas.getWidth() - widthPreviewgap, canvas.getHeight() - heightPreviewgap, myPaint);
-            canvas.drawText("C:" + box.centre+" I:"+box.inclination, canvas.getWidth() / 2, canvas.getHeight() / 2, myPaint);
+            canvas.drawText("C:" + box.centre+" I:"+box.inclination+" M:"+box.onMarker, canvas.getWidth() / 2, canvas.getHeight() / 2, myPaint);
             int squareOutLineLength1 = (cameraPreviewDisplayWidth * box.l1.length) / 100;
             int squareOutLineCenter1 = (cameraPreviewDisplayWidth * box.l1.centre) / 100;
             int squareOutLineLength2 = (cameraPreviewDisplayWidth * box.l2.length) / 100;
@@ -279,6 +288,7 @@ public class ScanerAcivity extends AppCompatActivity implements CameraController
             int squareOutLineCenter = (cameraPreviewDisplayWidth * box.centre) / 100;
             canvas.drawLine(widthPreviewgap,heightPreviewgap+(canvasHeight-heightPreviewgap*2)/8,canvasWidth-widthPreviewgap,heightPreviewgap+(canvasHeight-heightPreviewgap*2)/8,myPaint);
             canvas.drawLine(widthPreviewgap,heightPreviewgap+(canvasHeight-heightPreviewgap*2)/2,canvasWidth-widthPreviewgap,heightPreviewgap+(canvasHeight-heightPreviewgap*2)/2,myPaint);
+            canvas.drawLine(widthPreviewgap,heightPreviewgap+(canvasHeight-heightPreviewgap*2)*5/16,canvasWidth-widthPreviewgap,heightPreviewgap+(canvasHeight-heightPreviewgap*2)*5/16,myPaint);
             Paint boxPaint = new Paint();
             boxPaint.setColor(Color.argb(255, 0, 0, 255));
             boxPaint.setStrokeWidth(5);
